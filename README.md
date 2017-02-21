@@ -15,14 +15,14 @@ Before you can access the SharePoint via R, you must have a valid user
 name and password given to you by the ICES Secretariate. icesSharePoint
 requires your ICES username and password to be saved in environment
 variables, see for example, Appendix: Storing API Authentication
-Keys/Tokens in the
-[https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html](httr%20package%20vignette).
+Keys/Tokens in the [httr package
+vignette](https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html).
 The first time you use the API, the package will create an appropriate
 file ('~/.Renviron\_SP') to contain your username and password. It is
 important that this file is in a private location in your computer, such
 as your home drive '~'. Your password is never sent to the API, but is
 used to authenticate via
-[http://davenport.sourceforge.net/ntlm.html](ntlm).
+[ntlm](http://davenport.sourceforge.net/ntlm.html).
 
 Installation
 ------------
