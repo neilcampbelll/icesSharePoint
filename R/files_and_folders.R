@@ -1,4 +1,39 @@
+#' Files and Folders
+#'
+#' List the files and folders in a SharePoint directory.
+#'
+#' @param directory a directory name.
+#' @param site a SharePoint site name, e.g. '/ExpertGroups/WGNSSK'.
+#' @param site_collection a SharePoint site collection, will almost exclusively
+#'             be 'https://community.ices.dk', so these functions should work for other
+#'             SharePoint sites outside ICES.
+#' @param full a logical value. If TRUE, the directory path is prepended
+#'             to the file names to give a relative file path. If FALSE,
+#'             the file names (rather than paths) are returned.
+#' @param recursive logical. Should the listing recurse into directories?
+#'
+#' @return
+#' A character vector containing the names of the files in the specified directories,
+#' or "" if there were no files. If a path does not exist or is not a directory or is
+#' unreadable it is skipped, with a warning..
+#'
+#' @seealso
+#' \code{\link{setspwd}, \link{getspwd}} set and get SharePoint working directory.
+#'
+#' \code{\link{setspsite}, \link{getspsite}} set and get SharePoint default site.
+#'
+#' @examples
+#' \dontrun{
+#' spfolders()
+#' spfiles()
+#' spdir()
+#'
+#' spdir(site = "/ExpertGroups/WGNSSK")
+#' }
+#'
 #' @export
+#' @rdname spdir
+
 spfolders <- function(directory = "", site, site_collection, full = FALSE) {
 
   wd <- getspwd()
@@ -11,7 +46,7 @@ spfolders <- function(directory = "", site, site_collection, full = FALSE) {
   service <- sprintf("getFolderByServerRelativeUrl('%s')/Folders", directory)
   res <- spservice(service, site = site, site_collection = site_collection)
 
-  out <- sapply(res, "[[", "Name")
+  out <- sapply(res$results, "[[", "Name")
   if (length(out) == 0) {
     character(0)
   } else {
@@ -19,6 +54,7 @@ spfolders <- function(directory = "", site, site_collection, full = FALSE) {
   }
 }
 
+##' @rdname spdir
 #' @export
 spfiles <- function(directory = "", site, site_collection, full = FALSE) {
 
@@ -32,7 +68,7 @@ spfiles <- function(directory = "", site, site_collection, full = FALSE) {
   service <- sprintf("getFolderByServerRelativeUrl('%s')/Files", directory)
   res <- spservice(service, site = site, site_collection = site_collection)
 
-  out <- sapply(res, "[[", "Name")
+  out <- sapply(res$results, "[[", "Name")
   if (length(out) == 0) {
     character(0)
   } else {
@@ -40,7 +76,7 @@ spfiles <- function(directory = "", site, site_collection, full = FALSE) {
   }
 }
 
-
+##' @rdname spdir
 #' @export
 spdir <- function(directory = "", site, site_collection, recursive = FALSE, full = FALSE) {
 
@@ -64,40 +100,3 @@ spdir <- function(directory = "", site, site_collection, recursive = FALSE, full
   if (full) files else sub(paste0("^", directory, "/"), "", files)
 }
 
-
-#' @export
-setspwd <- function(directory) {
-
-  # if dir starts with ~/ the reset to root dir.
-  if (substring(directory, 1, 2) = "~/") {
-    directory <- substring(directory, 3)
-    options(icesSharePoint.wd = "")
-    setspwd(directory)
-  }
-
-  # otherwise work relative to current dir
-  wd <- getOption("icesSharePoint.wd")
-
-  # check directory is a folder
-  if (directory %in% spfolders(wd)) {
-    newwd <- if(wd != "") paste0(wd, "/", directory) else directory
-    options(icesSharePoint.wd = newwd)
-  } else {
-    stop('cannot change working directory')
-  }
-}
-
-#' @export
-getspwd <- function() {
-  getOption("icesSharePoint.wd")
-}
-
-#' @export
-setspsite <- function(site) {
-  options(icesSharePoint.site = site)
-}
-
-#' @export
-getspsite <- function() {
-  getOption("icesSharePoint.site")
-}
