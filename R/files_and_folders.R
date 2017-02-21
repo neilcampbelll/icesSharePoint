@@ -80,15 +80,15 @@ spfiles <- function(directory = "", site, site_collection, full = FALSE) {
 #' @export
 spdir <- function(directory = "", site, site_collection, recursive = FALSE, full = FALSE) {
 
-  files <- spfiles(directory, site)
-  dirs <- spfolders(directory, site)
+  files <- spfiles(directory, site = site, site_collection = site_collection)
+  dirs <- spfolders(directory, site = site, site_collection = site_collection)
 
   if (recursive) {
     while (length(dirs) != 0) {
       # grow file list
-      files <- c(files, spfiles(dirs[1], site, full = TRUE))
+      files <- c(files, spfiles(dirs[1], site = site, site_collection = site_collection, full = TRUE))
       # grow directory list
-      dirs <- c(dirs, spfolders(dirs[1], site, full = TRUE))
+      dirs <- c(dirs, spfolders(dirs[1], site = site, site_collection = site_collection, full = TRUE))
       # chop off just inspected directory
       dirs <- dirs[-1]
     }

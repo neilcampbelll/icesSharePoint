@@ -70,3 +70,47 @@ spservice <- function(service, site, site_collection) {
     res
   }
 }
+
+
+
+#' Basic POST request from SharePoint
+#'
+#' Implement a POST request for a given uri.
+#'
+#' @param uri an api request.
+#'
+#' @return
+#' The result of the request.
+#'
+#' @details
+#' The requests always ask for json data, but may on occasion (esp when
+#' the request fails) return xml.
+#'
+#'
+#' @export
+
+sppost <- function(uri, ...) {
+  if (getOption("icesSharePoint.messages", default = FALSE))
+    message("POSTing ... ", uri)
+  x <- httr::POST(uri,
+                  SP_cred(),
+                  ...)
+  message(httr::http_status(x)$message)
+
+  invisible(httr::content(x))
+}
+
+
+SP_fdv <- function(site, site_collection) {
+
+  if (missing(site_collection))
+    site_collection <- getOption("icesSharePoint.site_collection")
+
+  if (missing(site))
+    site <- getOption("icesSharePoint.site")
+
+  # request FormDigestValue (authentication token)
+  uri <- paste0(site_collection, site, "/_api/contextinfo")
+  x <- httr::POST(uri, SP_cred())
+  xml2::as_list(httr::content(x))$FormDigestValue[[1]]
+}
