@@ -12,5 +12,5 @@ Helper functions to download files from the ICES sharepoint.
 ICES Sharepoint site: \url{https://community.ices.dk/SitePages/Home.aspx}.
 }
 \author{
-Arni Magnusson and Colin Millar.
+Colin Millar and Arni Magnusson.
 }

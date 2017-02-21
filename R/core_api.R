@@ -1,7 +1,7 @@
 
 #' @export
 spget <- function(uri) {
-  if (getOption("icesSharePoint_messages", default = FALSE))
+  if (getOption("icesSharePoint.messages", default = FALSE))
     message("GETing ... ", uri)
   x <- httr::GET(uri,
                  SP_cred(),
@@ -10,8 +10,14 @@ spget <- function(uri) {
 }
 
 #' @export
-spservice <- function(service, site = NULL, site_collection = "https://community.ices.dk") {
-  if (is.null(site)) site <- ""
+spservice <- function(service, site, site_collection) {
+
+  if (missing(site_collection))
+    site_collection <- getOption("icesSharePoint.site_collection")
+
+  if (missing(site))
+    site <- getOption("icesSharePoint.site")
+
   uri <- paste0(site_collection, site, "/_api/web/", utils::URLencode(service))
   res <- spget(uri)
 
