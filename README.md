@@ -6,11 +6,24 @@ Status](https://travis-ci.org/ices-tools-prod/icesSharePoint.svg?branch=master)]
 icesSharePoint
 ==============
 
-icesSharePoint provides helper functions for the Transparent Assessment
-Framework (TAF) used by [ICES](http://www.ices.dk/Pages/default.aspx).
+icesSharePoint provides helper functions to access the SharePoint site
+used by [ICES](http://www.ices.dk/Pages/default.aspx).
 
 <!-- icesSharePoint is implemented as an [R](https://www.r-project.org) package and
 available on [CRAN](https://cran.r-project.org/package=icesSharePoint). -->
+Before you can access the SharePoint via R, you must have a valid user
+name and password given to you by the ICES Secretariate. icesSharePoint
+requires your ICES username and password to be saved in environment
+variables, see for example, Appendix: Storing API Authentication
+Keys/Tokens in the
+[https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html](httr%20package%20vignette).
+The first time you use the API, the package will create an appropriate
+file ('~/.Renviron\_SP') to contain your username and password. It is
+important that this file is in a private location in your computer, such
+as your home drive '~'. Your password is never sent to the API, but is
+used to authenticate via
+[http://davenport.sourceforge.net/ntlm.html](ntlm).
+
 Installation
 ------------
 
