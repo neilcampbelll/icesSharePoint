@@ -1,0 +1,11 @@
+Package: icesSharePoint
+Version: 1.0-0
+Date: 2017-02-20
+Title: Helper functions to interact with the ICES sharepoint
+Authors@R: c(person("Colin", "Millar", role=c("aut","cre"), email="colin.millar@ices.dk"),
+             person("Arni", "Magnusson", role=c("aut")))
+Imports: httr
+Description: Helper functions to interact with the ICES sharepoint
+  used by the International Council for the Exploration of the Sea (ICES).
+License: GPL (>= 2)
+RoxygenNote: 6.0.1
