@@ -37,7 +37,7 @@ ICES Community SharePoint site:
 
 Microsoft SharePoint 2013 REST interface reference
 
-\[<https://msdn.microsoft.com/en-us/library/office/jj860569.aspx>\]\[<https://msdn.microsoft.com/en-us/library/office/jj860569.aspx>\]
+<https://msdn.microsoft.com/en-us/library/office/jj860569.aspx>
 
 Development
 -----------
