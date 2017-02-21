@@ -1,10 +1,31 @@
-
+#' Check-in and Check-out Files
+#'
+#' Check out the file first to prevent other users from changing it.
+#' Then, check it back in after you've made your changes.
+#'
+#' @param file a name of a file on sharepoint.
+#' @param directory a directory name.
+#' @param site a SharePoint site name, e.g. '/ExpertGroups/WGNSSK'.
+#' @param site_collection a SharePoint site collection, will almost exclusively
+#'             be 'https://community.ices.dk', so these functions should work for other
+#'             SharePoint sites outside ICES.
+#' @param comment the checkin comment
+#'
+#' @return
+#' invisibly returns the response from the SharePoint server
+#'
+#' @seealso
+#' \code{\link{spfile.create}} To upload a file.
+#'
 #' @export
-spcheckout <- function(fname, dir, site, site_collection) {
+#' @rdname checkinout
+
+spcheckout <- function(file, directory, site, site_collection) {
 
   # create service
-  service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/checkout", site, dir, fname)
-  uri <- paste0(site_collection, site, "/_api/web/", URLencode(service))
+  service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/checkout",
+                     site, directory, file)
+  uri <- paste0(site_collection, site, "/_api/web/", utils::URLencode(service))
 
   # call the service
   sppost(uri,
@@ -13,11 +34,13 @@ spcheckout <- function(fname, dir, site, site_collection) {
 
 
 #' @export
-spundocheckout <- function(fname, dir, site, site_collection) {
+#' @rdname checkinout
+spundocheckout <- function(file, directory, site, site_collection) {
 
   # create service
-  service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/undocheckout", site, dir, fname)
-  uri <- paste0(site_collection, site, "/_api/web/", URLencode(service))
+  service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/undocheckout",
+                     site, directory, file)
+  uri <- paste0(site_collection, site, "/_api/web/", utils::URLencode(service))
 
   # call the service
   sppost(uri,
@@ -26,12 +49,13 @@ spundocheckout <- function(fname, dir, site, site_collection) {
 
 
 #' @export
-spcheckin <- function(comment, fname, dir, site, site_collection, checkintype = 0) {
+#' @rdname checkinout
+spcheckin <- function(comment, file, directory, site, site_collection) {
 
   # create service
-  service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/CheckIn(comment='%s',checkintype=%i)",
-                     site, dir, fname, comment, checkintype)
-  uri <- paste0(site_collection, site, "/_api/web/", URLencode(service))
+  service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/CheckIn(comment='%s',checkintype=0)",
+                     site, directory, file, comment)
+  uri <- paste0(site_collection, site, "/_api/web/", utils::URLencode(service))
 
   # call the service
   sppost(uri,

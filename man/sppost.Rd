@@ -8,9 +8,11 @@ sppost(uri, ...)
 }
 \arguments{
 \item{uri}{an api request.}
+
+\item{...}{additional arguments to POST.}
 }
 \value{
-The result of the request.
+The result of the request - often there is not response from a POST.
 }
 \description{
 Implement a POST request for a given uri.

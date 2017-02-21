@@ -78,14 +78,14 @@ spservice <- function(service, site, site_collection) {
 #' Implement a POST request for a given uri.
 #'
 #' @param uri an api request.
+#' @param ... additional arguments to POST.
 #'
 #' @return
-#' The result of the request.
+#' The result of the request - often there is not response from a POST.
 #'
 #' @details
 #' The requests always ask for json data, but may on occasion (esp when
 #' the request fails) return xml.
-#'
 #'
 #' @export
 
@@ -101,6 +101,22 @@ sppost <- function(uri, ...) {
 }
 
 
+# credential functions -------
+SP_cred <- function() {
+  # get value of environment variable SP_User
+  SP_User <- Sys.getenv("SP_User")
+  SP_password <- Sys.getenv("SP_Password")
+  if (any(identical(SP_User, ""), identical(SP_password, ""))) {
+    # SAG_PAT environment variable is not set
+    set_SP_cred()
+    cred <- SP_cred()
+  } else {
+    cred <- httr::authenticate(SP_User, SP_password, type = "ntlm")
+  }
+
+  cred
+}
+
 SP_fdv <- function(site, site_collection) {
 
   if (missing(site_collection))
@@ -114,3 +130,4 @@ SP_fdv <- function(site, site_collection) {
   x <- httr::POST(uri, SP_cred())
   xml2::as_list(httr::content(x))$FormDigestValue[[1]]
 }
+
