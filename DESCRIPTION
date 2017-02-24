@@ -10,3 +10,6 @@ Description: Helper functions to interact with the ICES sharepoint
   used by the International Council for the Exploration of the Sea (ICES).
 License: GPL (>= 2)
 RoxygenNote: 6.0.1
+Suggests: knitr,
+          rmarkdown
+VignetteBuilder: knitr

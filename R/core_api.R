@@ -103,18 +103,8 @@ sppost <- function(uri, ...) {
 
 # credential functions -------
 SP_cred <- function() {
-  # get value of environment variable SP_User
-  SP_User <- Sys.getenv("SP_User")
-  SP_password <- Sys.getenv("SP_Password")
-  if (any(identical(SP_User, ""), identical(SP_password, ""))) {
-    # SAG_PAT environment variable is not set
-    set_SP_cred()
-    cred <- SP_cred()
-  } else {
-    cred <- httr::authenticate(SP_User, SP_password, type = "ntlm")
-  }
-
-  cred
+  # always user current user values
+  httr::authenticate(":", ":", type = "ntlm")
 }
 
 SP_fdv <- function(site, site_collection) {

@@ -15,8 +15,5 @@
     eval(parse(text = paste0("options(", i , "=", opts[i], ")")))
   }
 
-  # read environment file
-  readRenviron(.SP_eviron_file)
-
   invisible()
 }
