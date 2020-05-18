@@ -10,8 +10,7 @@ spfolders(directory = "", site, site_collection, full = FALSE)
 
 spfiles(directory = "", site, site_collection, full = FALSE)
 
-spdir(directory = "", site, site_collection, recursive = FALSE,
-  full = FALSE)
+spdir(directory = "", site, site_collection, recursive = FALSE, full = FALSE)
 }
 \arguments{
 \item{directory}{a directory name.}

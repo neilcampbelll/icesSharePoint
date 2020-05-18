@@ -12,12 +12,10 @@ spgetuser(site, site_collection)
 \item{site_collection}{a SharePoint site collection, will almost exclusively
 be 'https://community.ices.dk', so these functions should work for other
 SharePoint sites outside ICES.}
-
-\item{dir}{a relative path of the directory to download the file to.}
 }
 \value{
 The path of the downloaded file
 }
 \description{
-Download file from sharepoint and return file location.
+Get a json list of information about the currently logged in user.
 }

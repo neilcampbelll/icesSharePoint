@@ -14,12 +14,29 @@
 #'
 #' @export
 
+#' @importFrom httr GET
+#' @importFrom httr accept
+#' @importFrom httr http_status
+#' @importFrom httr status_code
+#' @importFrom httr http_status
+#' @importFrom httr content
 spget <- function(uri) {
-  if (getOption("icesSharePoint.messages", default = FALSE))
+  if (getOption("icesSharePoint.messages", default = FALSE)) {
     message("GETing ... ", uri)
-  x <- httr::GET(uri,
-                 SP_cred(),
-                 httr::accept("application/json; odata=verbose"))
+  }
+
+  x <- httr::GET(
+    uri,
+    SP_cred(),
+    httr::accept("application/json; odata=verbose")
+  )
+
+  message(httr::http_status(x)$message)
+
+  if (httr::status_code(x) == 403) {
+    try(SP_clearpassword(), silent = TRUE)
+  }
+
   httr::content(x)
 }
 
@@ -89,6 +106,10 @@ spservice <- function(service, site, site_collection) {
 #'
 #' @export
 
+#' @importFrom httr POST
+#' @importFrom httr http_status
+#' @importFrom httr status_code
+#' @importFrom httr content
 sppost <- function(uri, ...) {
   if (getOption("icesSharePoint.messages", default = FALSE))
     message("POSTing ... ", uri)
@@ -97,14 +118,46 @@ sppost <- function(uri, ...) {
                   ...)
   message(httr::http_status(x)$message)
 
+  if (httr::status_code(x) == 403) {
+    try(SP_clearpassword(), silent = TRUE)
+  }
+
   invisible(httr::content(x))
 }
 
 
 # credential functions -------
+#' @importFrom keyring key_set
+#' @importFrom keyring key_get
+#' @importFrom httr authenticate
 SP_cred <- function() {
-  # always user current user values
-  httr::authenticate(":", ":", type = "ntlm")
+  username <- site_collection <- getOption("icesSharePoint.username")
+  # NULL means use user system login and password values
+  if (!is.null(username)) {
+    password <- try(
+      keyring::key_get("icesSharePoint", username),
+      silent = TRUE
+    )
+
+    if (inherits(password, "try-error")) {
+      keyring::key_set(
+        service = "icesSharePoint",
+        username = username
+      )
+      password <- keyring::key_get("icesSharePoint", username)
+    }
+
+    httr::authenticate(username, password, type = "ntlm")
+  } else {
+    httr::authenticate(":", ":", type = "ntlm")
+  }
+}
+
+#' @importFrom keyring key_delete
+#' @importFrom xml2 as_list
+SP_clearpassword <- function() {
+  username <- site_collection <- getOption("icesSharePoint.username")
+  keyring::key_delete("icesSharePoint", username = username)
 }
 
 SP_fdv <- function(site, site_collection) {
@@ -118,6 +171,5 @@ SP_fdv <- function(site, site_collection) {
   # request FormDigestValue (authentication token)
   uri <- paste0(site_collection, site, "/_api/contextinfo")
   x <- httr::POST(uri, SP_cred())
-  xml2::as_list(httr::content(x))$FormDigestValue[[1]]
+  xml2::as_list(httr::content(x))$GetContextWebInformation$FormDigestValue[[1]]
 }
-

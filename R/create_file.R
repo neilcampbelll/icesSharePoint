@@ -21,6 +21,8 @@
 #' @export
 #' @rdname filecreate
 
+#' @importFrom httr add_headers
+#' @importFrom utils URLencode
 spfile.create <- function(file, con, directory, site, site_collection, text = "") {
 
   # create service
@@ -32,7 +34,7 @@ spfile.create <- function(file, con, directory, site, site_collection, text = ""
   if (missing(con)) {
     body <- text
   } else {
-    body <- paste(readLines(con), collapse = "\n")
+    body <- httr::upload_file(con)
   }
 
   sppost(uri,
@@ -82,4 +84,35 @@ spfile.update <- function(file, con, directory, site, site_collection, text = ""
          body = body,
          httr::add_headers("X-RequestDigest" = SP_fdv(),
                            "X-HTTP-Method" = "PUT"))
+}
+
+
+
+
+
+spfile.startupload <-
+function (file, body, directory, site, site_collection, guid)
+{
+    service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/startupload(uploadId=guid'%s')",
+        site, directory, file, guid)
+    uri <- paste0(site_collection, site, "/_api/web/", utils::URLencode(service))
+    sppost(uri, body = body, httr::add_headers(`X-RequestDigest` = SP_fdv(site, site_collection)))
+}
+
+spfile.continueupload <-
+function (file, body, directory, site, site_collection, guid)
+{
+    service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/coninueupload(uploadId=guid'%s')",
+        site, directory, file, guid)
+    uri <- paste0(site_collection, site, "/_api/web/", utils::URLencode(service))
+    sppost(uri, body = body, httr::add_headers(`X-RequestDigest` = SP_fdv(site, site_collection)))
+}
+
+spfile.finishupload <-
+function (file, body, directory, site, site_collection, guid)
+{
+    service <- sprintf("GetFileByServerRelativeUrl('%s/%s/%s')/finishupload(uploadId=guid'%s')",
+        site, directory, file, guid)
+    uri <- paste0(site_collection, site, "/_api/web/", utils::URLencode(service))
+    sppost(uri, body = body, httr::add_headers(`X-RequestDigest` = SP_fdv(site, site_collection)))
 }

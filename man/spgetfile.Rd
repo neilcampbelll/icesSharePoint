@@ -4,7 +4,7 @@
 \alias{spgetfile}
 \title{Download Files from SharePoint}
 \usage{
-spgetfile(file, site, site_collection, dir = dirname(file))
+spgetfile(file, site, site_collection, destdir = dirname(file))
 }
 \arguments{
 \item{file}{a name of a file on sharepoint.}
@@ -15,7 +15,7 @@ spgetfile(file, site, site_collection, dir = dirname(file))
 be 'https://community.ices.dk', so these functions should work for other
 SharePoint sites outside ICES.}
 
-\item{dir}{a relative path of the directory to download the file to.}
+\item{destdir}{a relative path of the directory to download the file to.}
 }
 \value{
 The path of the downloaded file

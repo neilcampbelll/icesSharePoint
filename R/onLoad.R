@@ -5,6 +5,7 @@
   # default package options
   opts <-
     c(
+      "icesSharePoint.username" = "NULL",
       "icesSharePoint.messages" = "FALSE",
       "icesSharePoint.site_collection" = "'https://community.ices.dk'",
       "icesSharePoint.site" = "''",
