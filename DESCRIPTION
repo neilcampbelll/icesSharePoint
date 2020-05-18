@@ -1,6 +1,6 @@
 Package: icesSharePoint
-Version: 1.0-0
-Date: 2017-02-20
+Version: 1.0.0.9000
+Date: 2020-05-18
 Title: Helper functions to interact with the ICES sharepoint
 Authors@R: c(person("Colin", "Millar", role=c("aut","cre"), email="colin.millar@ices.dk"),
              person("Arni", "Magnusson", role=c("aut")))
