@@ -1,3 +1,9 @@
+---
+output:
+  github_document:
+    html_preview: false
+---
+
 [![Build Status](https://travis-ci.org/ices-tools-prod/icesSharePoint.svg?branch=master)](https://travis-ci.org/ices-tools-prod/icesSharePoint)
 
 [<img align="right" alt="ICES Logo" width="17%" height="17%" src="http://www.ices.dk/_layouts/15/1033/images/icesimg/iceslogo.png">](http://www.ices.dk/Pages/default.aspx)
@@ -36,6 +42,70 @@ For a summary of the package:
 library(icesSharePoint)
 ?icesSharePoint
 ```
+
+
+Basic example
+-------
+
+First of all you need to set your ices username for the session, this is done like so:
+```r
+# set ices username
+options(icesSharePoint.username = <your ices login name>)
+# check it has worked
+options("icesSharePoint.username")
+```
+
+
+A first call to anything will ask you for a password, for example:
+
+```r
+spdir()
+```
+
+there after it will be stored in a secrets store that only you have access to. However be carefull
+because if someone gains access to your computer your password will be accessible via:
+
+```r
+keyring::key_get("icesSharePoint", "colin") # beware!! this will print your password to the screen
+```
+
+You need to be logged into your machine as you to read this, but if someone somehow wrote a dodgy
+script, they could programatically access your password.... so beware!
+
+You can clear the password at the end of the session with this:
+```r
+icesSharePoint:::SP_clearpassword() # which just calls
+```
+
+The next step is set the site you are accessing to save supplying it in all
+the function calls, this exmaple uses WGMIXFISH-ADVICE sharepoint site. Only ices users who have
+been granted access can access this folder.
+
+```r
+options(icesSharePoint.site = "/ExpertGroups/WGMIXFISH-ADVICE")
+```
+
+Now find the directory you want to access
+
+```r
+# this prints the directory contents, and is useful to navigate to find the
+# directory or file you are interested in
+spdir()
+spdir("2020 Meeting Documents")
+# etc
+spdir("2020 Meeting Documents/06. Data/FIDES")
+```
+
+Now that you know the directory you want to acces, you can loop over all the files and
+download them one by one.  Single files can also be accessed in a similar way
+
+```r
+fnames <- spfiles("2020 Meeting Documents/06. Data/FIDES", full = TRUE)
+for (fname in fnames) {
+  spgetfile(fname, destdir = ".")
+}
+```
+
 
 References
 ----------
