@@ -107,6 +107,20 @@ for (fname in fnames) {
 ```
 
 
+You can also download the file in one line and specify the site you want to access
+from the `spgetfile` function. Another useful point of note is the `destdir` argument.
+by default files are downloaded in the same folder structure as they are on the sharepoint,
+but destdir overrides this.
+
+```r
+spgetfile(
+  "2021 Meeting Documents/06. Data/Iberian Waters/ANK2020.xlsx",
+  site = "/ExpertGroups/WGMIXFISH-ADVICE",
+  destdir = "."
+)
+```
+
+
 References
 ----------
 
