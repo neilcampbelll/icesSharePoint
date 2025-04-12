@@ -32,8 +32,8 @@ set_jwt_auth <- function(jwt_token = NULL, jwt_file = NULL) {
     stop("JWT token is empty or NULL. Please provide a valid JWT token.")
   }
   
-  # Basic token format validation
-  if(!grepl("^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$", jwt_token)) {
+  # Fixed regex pattern - moved hyphen to end of character class
+  if(!grepl("^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*$", jwt_token)) {
     warning("The JWT token does not appear to be in the standard format (header.payload.signature).")
   }
   
@@ -79,10 +79,16 @@ is_valid_jwt <- function(token = NULL) {
     return(FALSE)
   }
   
-  # Basic structure check
+  # Basic structure check with fixed regex
+  if(!grepl("^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*$", token)) {
+    warning("JWT token does not have the expected format (header.payload.signature)")
+    return(FALSE)
+  }
+  
+  # Split the token into its parts
   parts <- strsplit(token, "\\.")[[1]]
   if(length(parts) != 3) {
-    warning("JWT token does not have the expected format (header.payload.signature)")
+    warning("JWT token does not have three parts (header.payload.signature)")
     return(FALSE)
   }
   
@@ -115,4 +121,59 @@ is_valid_jwt <- function(token = NULL) {
     warning("Failed to validate JWT token: ", e$message)
     return(FALSE)
   })
+}
+
+#' Get JWT Token Information
+#'
+#' Decodes and returns information from the JWT token currently in use.
+#'
+#' @param token The JWT token to decode. If NULL, uses the token set via set_jwt_auth().
+#'
+#' @return A list containing the decoded header and payload from the JWT token
+#'
+#' @examples
+#' \dontrun{
+#' set_jwt_auth(jwt_file = "jwt.txt")
+#' token_info <- get_jwt_info()
+#' }
+#'
+#' @export
+get_jwt_info <- function(token = NULL) {
+  if(is.null(token)) {
+    token <- getOption("icesConnect.jwt")
+  }
+  
+  if(is.null(token)) {
+    stop("No JWT token provided or set.")
+  }
+  
+  # Split the token into its parts
+  parts <- strsplit(token, "\\.")[[1]]
+  if(length(parts) != 3) {
+    stop("JWT token does not have the expected format (header.payload.signature)")
+  }
+  
+  # Function to decode a base64 JWT part
+  decode_part <- function(part) {
+    # Add padding if needed
+    padding_needed <- (4 - nchar(part) %% 4) %% 4
+    if(padding_needed > 0) {
+      part <- paste0(part, strrep("=", padding_needed))
+    }
+    
+    # Decode base64
+    tryCatch({
+      payload_raw <- base64enc::base64decode(part)
+      payload_text <- rawToChar(payload_raw)
+      jsonlite::fromJSON(payload_text)
+    }, error = function(e) {
+      list(error = paste("Failed to decode:", e$message))
+    })
+  }
+  
+  # Return decoded header and payload
+  list(
+    header = decode_part(parts[1]),
+    payload = decode_part(parts[2])
+  )
 }
