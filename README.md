@@ -8,7 +8,7 @@ icesSharePoint provides helper functions to access the SharePoint site used by [
 
 ## Authentication
 
-This version uses JWT (JSON Web Token) authentication which replaces the previous username/password approach. Before you can access the SharePoint via R, you must have a valid JWT token from ICES. You can obtain this token from the ICES website or through your ICES administrator.
+This version uses JWT (JSON Web Token) authentication which replaces the previous username/password approach. Before you can access the SharePoint via R, you must have a valid JWT token from ICES. You can obtain this token from the ICES data portal.
 
 ## Installation
 
