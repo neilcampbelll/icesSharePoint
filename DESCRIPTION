@@ -1,18 +1,22 @@
 Package: icesSharePoint
-Version: 1.0.0.9000
-Date: 2020-05-18
-Title: Helper functions to interact with the ICES sharepoint
+Version: 2.0.0
+Date: 2025-04-12
+Title: Helper Functions to Interact with the ICES SharePoint Using JWT Authentication
 Authors@R: c(person("Colin", "Millar", role=c("aut","cre"), email="colin.millar@ices.dk"),
-             person("Arni", "Magnusson", role=c("aut")))
-Description: Helper functions to interact with the ICES sharepoint
-  used by the International Council for the Exploration of the Sea (ICES).
+             person("Arni", "Magnusson", role=c("aut")),
+             person("Neil", "Campbell", role=c("ctb")))
+Description: Helper functions to interact with the ICES SharePoint site using JWT 
+  (JSON Web Token) authentication. This package provides a modern authentication method
+  for accessing resources used by the International Council for the Exploration of the 
+  Sea (ICES).
 License: GPL (>= 2)
 RoxygenNote: 7.1.0
 Suggests: knitr,
           rmarkdown
-Imports: keyring,
-         httr,
+Imports: httr,
          xml2,
-         utils
+         utils,
+         base64enc,
+         jsonlite
 VignetteBuilder: knitr
 Encoding: UTF-8
