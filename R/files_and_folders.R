@@ -1,12 +1,11 @@
 #' Files and Folders
 #'
-#' List the files and folders in a SharePoint directory.
+#' List the files and folders in a SharePoint directory using JWT authentication.
 #'
 #' @param directory a directory name.
 #' @param site a SharePoint site name, e.g. '/ExpertGroups/WGNSSK'.
 #' @param site_collection a SharePoint site collection, will almost exclusively
-#'             be 'https://community.ices.dk', so these functions should work for other
-#'             SharePoint sites outside ICES.
+#'             be 'https://community.ices.dk'.
 #' @param full a logical value. If TRUE, the directory path is prepended
 #'             to the file names to give a relative file path. If FALSE,
 #'             the file names (rather than paths) are returned.
@@ -15,7 +14,7 @@
 #' @return
 #' A character vector containing the names of the files in the specified directories,
 #' or "" if there were no files. If a path does not exist or is not a directory or is
-#' unreadable it is skipped, with a warning..
+#' unreadable it is skipped, with a warning.
 #'
 #' @seealso
 #' \code{\link{setspwd}, \link{getspwd}} set and get SharePoint working directory.
@@ -24,6 +23,10 @@
 #'
 #' @examples
 #' \dontrun{
+#' # Set JWT token first
+#' set_jwt_auth(jwt_file = "jwt.txt")
+#' 
+#' # Then use the functions
 #' spfolders()
 #' spfiles()
 #' spdir()
@@ -33,19 +36,23 @@
 #'
 #' @export
 #' @rdname spdir
-
 spfolders <- function(directory = "", site, site_collection, full = FALSE) {
-
+  if (missing(site_collection))
+    site_collection <- getOption("icesSharePoint.site_collection")
+  
+  if (missing(site))
+    site <- getOption("icesSharePoint.site")
+  
   wd <- getspwd()
   if (wd != "" && directory != "") {
     directory <- paste0(wd, "/", directory)
   } else if (wd != "") {
     directory <- wd
   }
-
+  
   service <- sprintf("getFolderByServerRelativeUrl('%s')/Folders", directory)
   res <- spservice(service, site = site, site_collection = site_collection)
-
+  
   out <- sapply(res$results, "[[", "Name")
   if (length(out) == 0) {
     character(0)
@@ -57,17 +64,22 @@ spfolders <- function(directory = "", site, site_collection, full = FALSE) {
 ##' @rdname spdir
 #' @export
 spfiles <- function(directory = "", site, site_collection, full = FALSE) {
-
+  if (missing(site_collection))
+    site_collection <- getOption("icesSharePoint.site_collection")
+  
+  if (missing(site))
+    site <- getOption("icesSharePoint.site")
+  
   wd <- getspwd()
   if (wd != "" && directory != "") {
     directory <- paste0(wd, "/", directory)
   } else if (wd != "") {
     directory <- wd
   }
-
+  
   service <- sprintf("getFolderByServerRelativeUrl('%s')/Files", directory)
   res <- spservice(service, site = site, site_collection = site_collection)
-
+  
   out <- sapply(res$results, "[[", "Name")
   if (length(out) == 0) {
     character(0)
@@ -79,10 +91,15 @@ spfiles <- function(directory = "", site, site_collection, full = FALSE) {
 ##' @rdname spdir
 #' @export
 spdir <- function(directory = "", site, site_collection, recursive = FALSE, full = FALSE) {
-
+  if (missing(site_collection))
+    site_collection <- getOption("icesSharePoint.site_collection")
+  
+  if (missing(site))
+    site <- getOption("icesSharePoint.site")
+  
   files <- spfiles(directory, site = site, site_collection = site_collection)
   dirs <- spfolders(directory, site = site, site_collection = site_collection)
-
+  
   if (recursive) {
     while (length(dirs) != 0) {
       # grow file list
@@ -95,8 +112,7 @@ spdir <- function(directory = "", site, site_collection, recursive = FALSE, full
   } else {
     files <- c(files, dirs)
   }
-
+  
   files <- sort(files)
   if (full) files else sub(paste0("^", directory, "/"), "", files)
 }
-
