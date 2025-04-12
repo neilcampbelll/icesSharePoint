@@ -1,36 +1,20 @@
-
-[![Build
-Status](https://travis-ci.org/ices-tools-prod/icesSharePoint.svg?branch=master)](https://travis-ci.org/ices-tools-prod/icesSharePoint)
+[![Build Status](https://github.com/ices-tools-prod/icesSharePoint/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/ices-tools-prod/icesSharePoint/actions)
 
 [<img align="right" alt="ICES Logo" width="17%" height="17%" src="http://www.ices.dk/_layouts/15/1033/images/icesimg/iceslogo.png">](http://www.ices.dk/Pages/default.aspx)
 
 # icesSharePoint
 
-icesSharePoint provides helper functions to access the SharePoint site
-used by [ICES](http://www.ices.dk/Pages/default.aspx).
+icesSharePoint provides helper functions to access the SharePoint site used by [ICES](http://www.ices.dk/Pages/default.aspx).
 
-<!-- icesSharePoint is implemented as an [R](https://www.r-project.org) package and
-available on [CRAN](https://cran.r-project.org/package=icesSharePoint). -->
+## Authentication
 
-Before you can access the SharePoint via R, you must have a valid user
-name and password given to you by the ICES Secretariate. icesSharePoint
-requires your ICES username and password to be saved in environment
-variables, see for example, Appendix: Storing API Authentication
-Keys/Tokens in the [httr package
-vignette](https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html).
-The first time you use the API, the package will create an appropriate
-file (‘\~/.Renviron\_SP’) to contain your username and password. It is
-important that this file is in a private location in your computer, such
-as your home drive ‘\~’. Your password is never sent to the API, but is
-used to authenticate via
-[ntlm](http://davenport.sourceforge.net/ntlm.html).
+This version uses JWT (JSON Web Token) authentication which replaces the previous username/password approach. Before you can access the SharePoint via R, you must have a valid JWT token from ICES. You can obtain this token from the ICES website or through your ICES administrator.
 
 ## Installation
 
-icesSharePoint can be installed from GitHub using the `install_github`
-command from the `devtools` package:
+icesSharePoint can be installed from GitHub using the `install_github` command from the `devtools` package:
 
-``` r
+```r
 library(devtools)
 install_github("ices-tools-prod/icesSharePoint")
 ```
@@ -39,90 +23,125 @@ install_github("ices-tools-prod/icesSharePoint")
 
 For a summary of the package:
 
-``` r
+```r
 library(icesSharePoint)
 ?icesSharePoint
 ```
 
 ## Basic example
 
-First of all you need to set your ices username for the session, this is
-done like so:
+First, you need to set your JWT token. This can be done in a few ways:
 
-``` r
-# set ices username
-options(icesSharePoint.username = <your ices login name>)
-# check it has worked
-options("icesSharePoint.username")
+```r
+# Option 1: From a file
+set_jwt_auth(jwt_file = "jwt.txt")
+
+# Option 2: Directly with the token
+jwt_token <- "your.jwt.token.string"
+set_jwt_auth(jwt_token)
+
+# Option 3: Environment variable (set before starting R)
+# Sys.setenv(ICES_JWT = "your.jwt.token.string")
+# The package will automatically load this on startup
 ```
 
-A first call to anything will ask you for a password, for example:
+You can validate that your token is properly formatted and not expired:
 
-``` r
-spdir()
-```
-
-there after it will be stored in a secrets store that only you have
-access to. However be carefull because if someone gains access to your
-computer your password will be accessible via:
-
-``` r
-keyring::key_get("icesSharePoint", "colin") # beware!! this will print your password to the screen
-```
-
-You need to be logged into your machine as you to read this, but if
-someone somehow wrote a dodgy script, they could programatically access
-your password…. so beware\!
-
-You can clear the password at the end of the session with this:
-
-``` r
-icesSharePoint:::SP_clearpassword() # which just calls
-```
-
-The next step is set the site you are accessing to save supplying it in
-all the function calls, this exmaple uses WGMIXFISH-ADVICE sharepoint
-site. Only ices users who have been granted access can access this
-folder.
-
-``` r
-options(icesSharePoint.site = "/ExpertGroups/WGMIXFISH-ADVICE")
-```
-
-Now find the directory you want to access
-
-``` r
-# this prints the directory contents, and is useful to navigate to find the
-# directory or file you are interested in
-spdir()
-spdir("2020 Meeting Documents")
-# etc
-spdir("2020 Meeting Documents/06. Data/FIDES")
-```
-
-Now that you know the directory you want to acces, you can loop over all
-the files and download them one by one. Single files can also be
-accessed in a similar way
-
-``` r
-fnames <- spfiles("2020 Meeting Documents/06. Data/FIDES", full = TRUE)
-for (fname in fnames) {
-  spgetfile(fname, destdir = ".")
+```r
+if (!is_valid_jwt()) {
+  stop("JWT token is invalid or expired. Please obtain a new token.")
 }
 ```
 
-You can also download the file in one line and specify the site you want
-to access from the `spgetfile` function. Another useful point of note is
-the `destdir` argument. by default files are downloaded in the same
-folder structure as they are on the sharepoint, but destdir overrides
-this.
+Next, set the SharePoint site you want to access to avoid specifying it in all function calls:
 
-``` r
+```r
+options(icesSharePoint.site = "/ExpertGroups/WGMIXFISH-ADVICE")
+```
+
+Now find the directory you want to access:
+
+```r
+# This prints the directory contents, useful for navigation
+spdir()
+spdir("2023 Meeting Documents")
+spdir("2023 Meeting Documents/06. Data")
+```
+
+Once you know the directory you want to access, you can list and download files:
+
+```r
+# List files in a directory
+files <- spfiles("2023 Meeting Documents/06. Data", full = TRUE)
+
+# Download individual files
+for (file in files) {
+  spgetfile(file, destdir = "data")
+}
+
+# Or download a specific file
 spgetfile(
-  "2021 Meeting Documents/06. Data/Iberian Waters/ANK2020.xlsx",
-  site = "/ExpertGroups/WGMIXFISH-ADVICE",
-  destdir = "."
+  "2023 Meeting Documents/06. Data/important_data.xlsx",
+  destdir = "data"
 )
+
+# For large files, use the specialized function with progress reporting
+spgetfile_large(
+  "2023 Meeting Documents/06. Data/large_dataset.zip",
+  destdir = "data",
+  progress = TRUE
+)
+```
+
+You can also create, update, and delete files and folders:
+
+```r
+# Create a folder
+spdir.create("NewFolder", "2023 Meeting Documents", 
+           site = "/ExpertGroups/WGMIXFISH-ADVICE")
+
+# Upload a file
+spfile.create("data.csv", con = "local_data.csv", 
+              directory = "2023 Meeting Documents/NewFolder",
+              site = "/ExpertGroups/WGMIXFISH-ADVICE")
+
+# Update a file
+spfile.update("data.csv", con = "updated_data.csv",
+              directory = "2023 Meeting Documents/NewFolder",
+              site = "/ExpertGroups/WGMIXFISH-ADVICE")
+
+# Delete a file
+spfile.delete("data.csv", directory = "2023 Meeting Documents/NewFolder",
+              site = "/ExpertGroups/WGMIXFISH-ADVICE")
+
+# Delete a folder
+spdir.delete("NewFolder", "2023 Meeting Documents",
+             site = "/ExpertGroups/WGMIXFISH-ADVICE")
+```
+
+When you're done with your session, you can clear the JWT token (optional):
+
+```r
+clear_jwt_auth()
+```
+
+## JWT Token Management
+
+The package provides several functions to help manage your JWT tokens:
+
+```r
+# Set your JWT token
+set_jwt_auth(jwt_file = "jwt.txt")
+
+# Get the currently set JWT token
+token <- get_jwt_auth()
+
+# Check if the token is valid
+is_valid <- is_valid_jwt()
+
+# Get information from the token (useful for debugging)
+token_info <- get_jwt_info()
+print(token_info$payload$exp)  # Expiration timestamp
 ```
 
 ## References
@@ -131,26 +150,12 @@ ICES Community SharePoint site:
 
 <https://community.ices.dk/SitePages/Home.aspx>
 
-Microsoft SharePoint 2013 REST interface reference
+Microsoft SharePoint REST interface reference:
 
-<https://msdn.microsoft.com/en-us/library/office/jj860569.aspx>
+<https://learn.microsoft.com/en-us/sharepoint/dev/sp-add-ins/get-to-know-the-sharepoint-rest-service>
 
 ## Development
 
-icesSharePoint is developed openly on
-[GitHub](https://github.com/ices-tools-prod/icesSharePoint).
+icesSharePoint is developed openly on [GitHub](https://github.com/ices-tools-prod/icesSharePoint).
 
-Feel free to open an
-[issue](https://github.com/ices-tools-prod/icesSharePoint/issues) there
-if you encounter problems or have suggestions for future versions.
-
-<!--
-The current development version can be installed using:
-
-```R
-library(devtools)
-install_github("ices-tools-prod/icesSharePoint")
-```
--->
-
-<!-- Poke Travis -->
+Feel free to open an [issue](https://github.com/ices-tools-prod/icesSharePoint/issues) there if you encounter problems or have suggestions for future versions.
